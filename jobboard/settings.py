@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "accounts",
     "jobs",
     "applications",
+    'django.contrib.postgres',
 ]
 
 MIDDLEWARE = [
