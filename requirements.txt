@@ -11,4 +11,5 @@ pytest
 pytest-django
 pytest-cov
 gunicorn
+django-redis
 
