@@ -1,0 +1,15 @@
+Django>=4.1
+djangorestframework
+djangorestframework-simplejwt
+django-filter
+drf-spectacular
+psycopg2-binary
+django-environ
+django-cors-headers
+celery
+pytest
+pytest-django
+pytest-cov
+gunicorn
+django-redis
+
