@@ -1,4 +1,5 @@
 version: "3.8"
+
 services:
   web:
     build: .
@@ -10,9 +11,13 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
-      - rabbitmq
-      - redis
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
   db:
     image: postgres:14
     environment:
@@ -21,22 +26,42 @@ services:
       POSTGRES_PASSWORD: changeme
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobboard_user -d jobboard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.13-management
     ports:
+      - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:7
     ports:
       - "6379:6379"
+
   celery:
     build: .
     command: celery -A jobboard worker -l info
     env_file:
       - .env
     depends_on:
-      - web
-      - rabbitmq
-      - redis
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      web:
+        condition: service_started
+
 volumes:
   postgres_data:
