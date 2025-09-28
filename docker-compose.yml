@@ -3,11 +3,12 @@ services:
     build: .
     command: gunicorn jobboard.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - .:/code
+      - .:/code:delegated   # add :delegated for performance
     ports:
       - "8000:8000"
     env_file:
       - .env
+    user: "1000:1000"       # match host user ID if needed
     depends_on:
       db:
         condition: service_healthy
@@ -21,6 +22,9 @@ services:
     command: celery -A jobboard worker -l info
     env_file:
       - .env
+    volumes:
+      - .:/code:delegated   #  mount with same permissions
+    user: "1000:1000"       # run as non-root
     depends_on:
       db:
         condition: service_healthy
@@ -30,6 +34,7 @@ services:
         condition: service_started
       web:
         condition: service_started
+
 
   db:
     image: postgres:14

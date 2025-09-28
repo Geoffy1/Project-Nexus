@@ -26,3 +26,12 @@ COPY . /code/
 
 # Default command (override in docker-compose for web/celery)
 CMD ["gunicorn", "jobboard.wsgi:application", "--bind", "0.0.0.0:8000"]
+
+# Create a non-root user
+RUN addgroup --system app && adduser --system --ingroup app app
+
+# Change ownership of /code so the user can access it
+RUN chown -R app:app /code
+
+# Switch to non-root user
+USER app
