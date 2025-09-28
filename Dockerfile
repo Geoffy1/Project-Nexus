@@ -105,6 +105,10 @@ RUN pip install -r requirements.txt
 # Copy project
 COPY . /code/
 
+# Collect static files during build
+RUN mkdir -p /code/staticfiles
+
+
 # Ensure entrypoint is executable
 COPY entrypoint.sh /code/entrypoint.sh
 RUN chmod +x /code/entrypoint.sh
@@ -117,3 +121,6 @@ USER appuser
 
 # Default command (overridable in docker-compose.yml)
 CMD ["/code/entrypoint.sh", "gunicorn", "jobboard.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+
+ENV PORT 8000
+CMD ["/code/entrypoint.sh", "gunicorn", "jobboard.wsgi:application", "--bind", "0.0.0.0:${PORT}", "--workers", "3"]

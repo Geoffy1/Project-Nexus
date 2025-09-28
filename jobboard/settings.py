@@ -97,3 +97,4 @@ CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="amqp://guest:guest@rabbitm
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://redis:6379/0")
 
 STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
