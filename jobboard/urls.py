@@ -18,12 +18,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from jobs.views import JobViewSet
+from jobs.views import JobViewSet, CategoryViewSet
+from applications.views import ApplicationViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 router = DefaultRouter()
 router.register(r"jobs", JobViewSet, basename="job")
+router.register(r"categories", CategoryViewSet, basename="category")
+router.register(r"applications", ApplicationViewSet, basename="application")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
