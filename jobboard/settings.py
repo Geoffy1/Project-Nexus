@@ -64,7 +64,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "jobboard.wsgi.application"
 
 DATABASES = {
-    "default": env.db("DATABASE_URL", default="postgres://jobboard_user:changeme@db:5432/jobboard")
+    "default": env.db("DATABASE_URL", default="postgresql://jobboard_db_t5z9_user:33HSE0dx6iGjQD6xYhdKIyafHTBZ9pfc@dpg-d3cq252li9vc73dqaif0-a/jobboard_db_t5z9")
 }
 
 AUTH_USER_MODEL = "accounts.User"
