@@ -3,14 +3,55 @@ import os
 from pathlib import Path
 import environ
 import datetime
+# import dj_database_url # Uncomment if you want to use dj-database-url for DATABASE_URL
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
+# Read .env file for development and local variables
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
-SECRET_KEY = env("SECRET_KEY", default="changeme")
-DEBUG = env.bool("DEBUG", default=True)
-ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", default="localhost").split(",")
+# --- PRODUCTION / ENVIRONMENT-CRITICAL SETTINGS ---
+# Use os.getenv for critical settings often set by hosting environment
+# SECRET_KEY: Must be set in the production environment
+SECRET_KEY = os.getenv("SECRET_KEY", env("SECRET_KEY", default="changeme"))
+if SECRET_KEY == "changeme" and not env.bool("DEBUG", default=True):
+    raise Exception('SECRET_KEY environment variable is required in production')
+
+# DEBUG: Use environment variable, default to False if not explicitly set
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+# ALLOWED_HOSTS: Read from environment, or fall back to .env/default
+allowed_hosts_str = os.getenv('DJANGO_ALLOWED_HOSTS', env("DJANGO_ALLOWED_HOSTS", default="localhost"))
+ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_str.split(',') if h.strip()]
+if not DEBUG and not ALLOWED_HOSTS:
+    raise Exception('ALLOWED_HOSTS must be set in production')
+
+# Static files (WhiteNoise configuration)
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_URL = "/static/"
+# Use CompressedManifestStaticFilesStorage for cache-busting in production
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# Celery: Prefer environment variables set by hosting platform
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", env("CELERY_BROKER_URL", default="amqp://guest:guest@rabbitmq:5672//"))
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", env("CELERY_RESULT_BACKEND", default="redis://redis:6379/0"))
+
+# DATABASES: Prefer environment variable (e.g., set by hosting platform)
+# If using dj-database-url:
+# try:
+#     DATABASES = {'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))}
+# except Exception:
+#     # Fallback to env.db() if DATABASE_URL is not set or parse fails
+#     DATABASES = {
+#         "default": env.db("DATABASE_URL", default="postgresql://jobboard_db_t5z9_user:33HSE0dx6iGjQD6xYhdKIyafHTBZ9pfc@dpg-d3cq252li9vc73dqaif0-a/jobboard_db_t5z9")
+#     }
+# Else, just use the environ setup:
+DATABASES = {
+    "default": env.db("DATABASE_URL", default="postgresql://jobboard_db_t5z9_user:33HSE0dx6iGjQD6xYhdKIyafHTBZ9pfc@dpg-d3cq252li9vc73dqaif0-a/jobboard_db_t5z9")
+}
+
+
+# --- GENERAL & DJANGO CORE SETTINGS ---
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -23,6 +64,7 @@ INSTALLED_APPS = [
     # third-party
     "rest_framework",
     "drf_spectacular",
+    "rest_framework_simplejwt", # Added simplejwt
     "django_filters",
     "corsheaders",
 
@@ -35,6 +77,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # WhiteNoise must be near the top
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
@@ -63,11 +106,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "jobboard.wsgi.application"
 
-DATABASES = {
-    "default": env.db("DATABASE_URL", default="postgresql://jobboard_db_t5z9_user:33HSE0dx6iGjQD6xYhdKIyafHTBZ9pfc@dpg-d3cq252li9vc73dqaif0-a/jobboard_db_t5z9")
-}
-
 AUTH_USER_MODEL = "accounts.User"
+
+
+# --- REST FRAMEWORK & SECURITY SETTINGS ---
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -94,9 +136,20 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
 }
 
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="amqp://guest:guest@rabbitmq:5672//")
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://redis:6379/0")
 
-STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-STATICFILES_STORAGE = "whitenoise.storage. CompressedManifestStaticFilesStorage"
+# --- INTERNATIONALIZATION & MISC ---
+
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_TZ = True
+
+
+# --- AUTH & PASSWORD VALIDATION (Defaults) ---
+
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
+]

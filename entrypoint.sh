@@ -2,25 +2,41 @@
 set -e
 
 echo "Waiting for DB to be ready..."
-# Simple loop; for Render an external DB might be ready, but this is safe:
-# You can replace with wait-for-it if you prefer.
-until python -c "import sys,os; \
-from urllib.parse import urlparse; \
-db=os.getenv('DATABASE_URL'); \
-import psycopg2, time; \
-p=urlparse(db); \
-conn=None; \
-try: \
-  conn=psycopg2.connect(dbname=p.path[1:], user=p.username, password=p.password, host=p.hostname, port=p.port, connect_timeout=5); \
-  conn.close(); \
-  sys.exit(0); \
-except Exception as e: \
-  print('DB not ready yet, sleeping...'); \
-  time.sleep(2)"
 
-do
-  sleep 1
-done
+# Minimal DB probe using psycopg2. Requires psycopg2-binary installed.
+python - <<'PY'
+import os, sys, time
+from urllib.parse import urlparse
+try:
+    import psycopg2
+except Exception:
+    print("psycopg2 not installed — skipping DB wait")
+    sys.exit(0)
+
+DATABASE_URL = os.getenv('DATABASE_URL')
+if not DATABASE_URL:
+    print('No DATABASE_URL set, skipping DB wait')
+    sys.exit(0)
+
+p = urlparse(DATABASE_URL)
+
+while True:
+    try:
+        conn = psycopg2.connect(
+            dbname=p.path[1:], 
+            user=p.username, 
+            password=p.password, 
+            host=p.hostname, 
+            port=p.port, 
+            connect_timeout=5
+        )
+        conn.close()
+        print('DB is available')
+        break
+    except Exception as e:
+        print('DB not ready yet: {}'.format(e))
+        time.sleep(2)
+PY
 
 echo "Applying database migrations..."
 python manage.py migrate --noinput
@@ -28,11 +44,19 @@ python manage.py migrate --noinput
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
-# Create superuser if env vars provided (optional)
-if [ -n "$DJANGO_SUPERUSER_EMAIL" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ] && [ -n "$DJANGO_SUPERUSER_USERNAME" ]; then
-  python manage.py createsuperuser --noinput --email "$DJANGO_SUPERUSER_EMAIL" || true
+# Optionally create a superuser from env vars (safe to run; will no-op if user exists)
+if [ -n "$DJANGO_SUPERUSER_EMAIL" ] && [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
+  echo "Creating superuser if it does not exist..."
+  python manage.py shell -c "
+from django.contrib.auth import get_user_model
+User = get_user_model()
+username = '$DJANGO_SUPERUSER_USERNAME'
+email = '$DJANGO_SUPERUSER_EMAIL'
+pw = '$DJANGO_SUPERUSER_PASSWORD'
+if not User.objects.filter(username=username).exists():
+    User.objects.create_superuser(username=username, email=email, password=pw)
+" || true
 fi
 
-echo "Starting server..."
+echo "Starting application..."
 exec "$@"
-

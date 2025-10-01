@@ -10,7 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# system deps required to build psycopg2 and others
+# system deps required to build some packages (keep minimal)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        build-essential \
@@ -23,7 +23,8 @@ RUN apt-get update \
 # copy requirements and install deps
 COPY requirements.txt /app/
 RUN pip install --upgrade pip
-RUN pip install --no-binary :all: -r /app/requirements.txt
+# Use regular pip install (allow wheels). Avoid forcing no-binary which breaks psycopg2-binary.
+RUN pip install -r /app/requirements.txt
 
 # copy project
 COPY . /app/
@@ -40,5 +41,10 @@ RUN mkdir -p /app/staticfiles
 
 EXPOSE 8000
 
+# copy entrypoint and make executable
+# Note: docker-compose mounts repo at /code in local dev. In container, entrypoint comes from mounted repo (so ensure host file is executable).
+COPY ./entrypoint.sh /app/entrypoint.sh
+#RUN chmod +x /app/entrypoint.sh
+
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["gunicorn", "jobboard.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--threads", "4"]
+CMD ["gunicorn", "jobboard.wsgi:application", "--bind", "0.0.0.0:$PORT", "--workers", "3"]
