@@ -45,6 +45,8 @@ EXPOSE 8000
 # Note: docker-compose mounts repo at /code in local dev. In container, entrypoint comes from mounted repo (so ensure host file is executable).
 COPY ./entrypoint.sh /app/entrypoint.sh
 #RUN chmod +x /app/entrypoint.sh
+RUN chmod 755 /app/entrypoint.sh || true
+
 
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["gunicorn", "jobboard.wsgi:application", "--bind", "0.0.0.0:$PORT", "--workers", "3"]
