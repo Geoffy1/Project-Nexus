@@ -35,11 +35,11 @@ if not DEBUG and not ALLOWED_HOSTS:
 # ----------------------------
 
 # ✅ Use Render’s DATABASE_URL automatically
-DATABASE_URL = os.getenv(
-    "postgresql://jobboard_db_t5z9_user:33HSE0dx6iGjQD6xYhdKIyafHTBZ9pfc@dpg-d3cq252li9vc73dqaif0-a/jobboard_db_t5z9"
-)
+DATABASE_URL = os.getenv("DATABASE_URL", default=None)
+
 if not DATABASE_URL:
     raise Exception("DATABASE_URL must be set for production on Render")
+
 DATABASES = {
     "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=True)
 }
