@@ -45,7 +45,9 @@ EXPOSE 8000
 ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Default command for the web service (Render will override for the worker)
-CMD ["gunicorn", "jobboard.wsgi:application", "--bind", "0.0.0.0:$PORT", "--workers", "3"]
+#CMD ["gunicorn", "jobboard.wsgi:application", "--bind", "0.0.0.0:$PORT", "--workers", "3"]
+CMD gunicorn jobboard.wsgi:application --bind 0.0.0.0:$PORT
+
 
 
 
