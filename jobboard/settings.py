@@ -20,7 +20,11 @@ if SECRET_KEY == "changeme" and not env.bool("DEBUG", default=True):
 
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-allowed_hosts_str = os.getenv("DJANGO_ALLOWED_HOSTS", env("DJANGO_ALLOWED_HOSTS", default="localhost"))
+# ----------------------------
+# 🌐 ALLOWED HOSTS CONFIGURATION
+# ----------------------------
+default_hosts = ["localhost", "127.0.0.1", "project-nexus-uulu.onrender.com"]
+allowed_hosts_str = os.getenv("DJANGO_ALLOWED_HOSTS", env("DJANGO_ALLOWED_HOSTS", default=",".join(default_hosts)))
 ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_str.split(",") if h.strip()]
 
 if not DEBUG and not ALLOWED_HOSTS:
