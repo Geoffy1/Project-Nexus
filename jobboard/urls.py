@@ -22,6 +22,7 @@ from jobs.views import JobViewSet, CategoryViewSet
 from applications.views import ApplicationViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.http import JsonResponse
 
 router = DefaultRouter()
 router.register(r"jobs", JobViewSet, basename="job")
@@ -35,4 +36,13 @@ urlpatterns = [
     path("api/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+]
+
+
+def health_check(request):
+    return JsonResponse({"status": "ok"})
+
+urlpatterns = [
+    # existing paths
+    path("health/", health_check),
 ]
