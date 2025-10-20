@@ -23,6 +23,19 @@ from applications.views import ApplicationViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.http import JsonResponse
+from django.http import JsonResponse
+#home or root added
+def home(request):
+    return JsonResponse({
+        "message": "Welcome to Project Nexus Job Board API",
+        "endpoints": {
+            "jobs": "/api/jobs/",
+            "categories": "/api/categories/",
+            "applications": "/api/applications/",
+            "docs": "/api/docs/"
+        }
+    })
+#end of home
 
 router = DefaultRouter()
 router.register(r"jobs", JobViewSet, basename="job")
@@ -30,6 +43,7 @@ router.register(r"categories", CategoryViewSet, basename="category")
 router.register(r"applications", ApplicationViewSet, basename="application")
 
 urlpatterns = [
+    path("", home), #added root route to avoid error (Not Found The requested resource was not found on this server.)
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     path("api/auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
