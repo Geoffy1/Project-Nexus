@@ -3,6 +3,131 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Nexus Job Board API</title>
+
+    <!-- Google Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* === Base === */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #0a2540, #1e90ff);
+        color: #ffffff;
+        text-align: center;
+        animation: fadeIn 1.2s ease-in-out;
+      }
+
+      /* === Animations === */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* === Layout === */
+      h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .container {
+        max-width: 600px;
+        padding: 1.5rem;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      /* === API Links === */
+      ul {
+        list-style: none;
+        margin-top: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      a {
+        color: #61dafb;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      a:hover {
+        color: #fff;
+        transform: scale(1.05);
+      }
+
+      /* === Footer === */
+      footer {
+        margin-top: 2rem;
+        font-size: 0.85rem;
+        opacity: 0.8;
+      }
+
+      /* === Responsive === */
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 1.5rem;
+        }
+        .container {
+          margin: 0 1rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Welcome to Project Nexus Job Board API</h1>
+      <p>Explore available endpoints and build your next integration.</p>
+
+      <ul>
+        <li><a href="/api/jobs/">🧰 Jobs API</a></li>
+        <li><a href="/api/categories/">📂 Categories API</a></li>
+        <li><a href="/api/applications/">💼 Applications API</a></li>
+        <li><a href="/api/docs/">📘 API Docs (Swagger UI)</a></li>
+      </ul>
+
+      <footer>© 2025 Project Nexus — Empowering Developers Everywhere</footer>
+    </div>
+  </body>
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Project Nexus API</title>
     <style>
       body {
@@ -57,4 +182,4 @@
       © 2025 Project Nexus — Crafted with 💙 by Geofrey Simiyu Njogu
     </footer>
   </body>
-</html>
+</html> -->
